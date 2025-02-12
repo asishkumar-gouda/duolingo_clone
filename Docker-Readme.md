@@ -35,3 +35,31 @@ This Docker repository contains a Docker image for the Duolingo Clone project, a
 - Adjust port mappings if necessary to avoid conflicts with other applications using port 3000 on your local machine.
 
 This repository provides a streamlined way to deploy and test the Duolingo Clone application using Docker, ensuring consistent environments across different setups.
+
+# Duolingo Clone - Docker Compose Instructions
+
+This document provides instructions for managing and running the Duolingo Clone application using Docker Compose.
+
+## Prerequisites
+
+- Ensure Docker and Docker Compose are installed and running on your machine.
+- Adjust port mappings if necessary to avoid conflicts with other applications using port 3000.
+
+## Build and Start Services
+
+To build and start the services using Docker Compose, run:
+
+```bash
+docker-compose up --build
+```
+# Stop and Remove Containers, Networks, and Volumes
+
+To stop the running containers and remove the containers, networks, and any anonymous volumes defined in your Docker Compose setup, run:
+
+```bash
+docker-compose down --volumes
+```
+# Remove All Unused Volumes:
+```bash
+docker volume prune -f
+```
