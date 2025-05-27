@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: "{{ .Values.global.imagePullSecrets[0].name }}"
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.frontend.service.port }}
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.database.username }}:{{ .Values.postgresql.database.password }}@postgres:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.database.name }}"
+            - name: NEXT_PUBLIC_APP_URL
+              value: "http://{{ .Values.ingress.hostname }}"

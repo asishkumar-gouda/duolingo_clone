@@ -1,0 +1,33 @@
+# Global values
+global:
+  imagePullSecrets:
+    - name: ecr-secret
+
+# Frontend configuration
+frontend:
+  image:
+    repository: <your-ecr-repo-url>/duolingo-frontend
+    tag: latest
+  replicas: 2
+  service:
+    type: ClusterIP
+    port: 3000
+
+# PostgreSQL configuration
+postgresql:
+  image:
+    repository: postgres
+    tag: 15-alpine
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 5432
+  database:
+    name: Duolingo
+    username: Duolingo_owner
+    password: 67DMpFRHOxXy
+
+# Ingress configuration
+ingress:
+  enabled: true
+  hostname: duolingo-clone.example.com
