@@ -13,27 +13,27 @@ pipeline {
     }
 
     stages {
-        stage('Validate') {
+        stage('Validate Tag') {
             steps {
                 script {
                     if (!params.TAG?.trim()) {
                         error('TAG parameter is required (e.g., v1.0.0)')
                     }
-                    echo "Deploying version: ${params.TAG} (image tag: ${env.DOCKER_TAG})"
                 }
+                echo "Deploying version: ${params.TAG} → image tag: ${env.DOCKER_TAG}"
             }
         }
 
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
                 checkout scm
+                echo "Repository checked out at branch: main"
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Source NEXT_PUBLIC_ vars from .env if it exists
                     def clerkKey = ''
                     def appUrl = 'http://localhost'
                     if (fileExists('.env')) {
@@ -53,13 +53,15 @@ pipeline {
                             .
                     """
                 }
+                echo "Image built: ${env.FULL_IMAGE}"
             }
         }
 
-        stage('Push Image') {
+        stage('Push to Registry') {
             steps {
                 sh "docker push ${env.FULL_IMAGE}"
                 sh "docker push ${env.REGISTRY}/${env.IMAGE_NAME}:latest"
+                echo "Pushed ${env.FULL_IMAGE} and :latest to ${env.REGISTRY}"
             }
         }
 
@@ -69,10 +71,11 @@ pipeline {
                     sed -i 's|^  tag:.*|  tag: "${env.DOCKER_TAG}"|' deploy/values.yaml
                     sed -i 's|^appVersion:.*|appVersion: "${env.DOCKER_TAG}"|' deploy/Chart.yaml
                 """
+                echo "Helm chart updated to version ${env.DOCKER_TAG}"
             }
         }
 
-        stage('Commit & Push') {
+        stage('Commit & Push Changes') {
             steps {
                 sh """
                     git config user.email "jenkins@local"
@@ -81,6 +84,7 @@ pipeline {
                     git diff --cached --quiet || git commit -m "ci: update image tag to ${env.DOCKER_TAG}"
                     git push origin HEAD:main
                 """
+                echo "Changes pushed to main — ArgoCD will auto-sync"
             }
         }
     }
@@ -88,15 +92,15 @@ pipeline {
     post {
         success {
             echo """
-            ==========================================
-            Deploy complete!
-            Image: ${env.FULL_IMAGE}
-            ArgoCD will auto-sync the new version.
-            ==========================================
-            """
+============================================
+  Deploy Successful!
+  Version : ${params.TAG}
+  Image   : ${env.FULL_IMAGE}
+  ArgoCD will auto-sync the new version.
+============================================"""
         }
         failure {
-            echo 'Deploy failed. Check the logs above.'
+            echo 'Deploy failed — check the stage logs above.'
         }
     }
 }
