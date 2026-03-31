@@ -2,6 +2,8 @@
 
 ### The Duolingo Clone is now Dockerized. You can use it in Docker via the instructions provided in the [Docker README](Docker-Readme.md).
 
+### Tag-Based Deploy Pipeline with Jenkins, Kubernetes & ArgoCD. See the [Deploy README](Deploy-Readme.md).
+
 
 https://github.com/ASISHGOUDA/duolingo_clone/assets/94213250/0890410d-0681-4342-9d96-cbb5999201c3
 ### Database Schema
