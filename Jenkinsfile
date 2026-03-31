@@ -36,12 +36,15 @@ pipeline {
                 script {
                     def clerkKey = ''
                     def appUrl = 'http://localhost'
+                    def dbUrl = ''
                     if (fileExists('.env')) {
                         def envContent = readFile('.env')
                         def clerkMatch = envContent =~ /NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=(.*)/
                         def urlMatch = envContent =~ /NEXT_PUBLIC_APP_URL=(.*)/
+                        def dbMatch = envContent =~ /DATABASE_URL=(.*)/
                         if (clerkMatch) { clerkKey = clerkMatch[0][1].trim() }
                         if (urlMatch) { appUrl = urlMatch[0][1].trim() }
+                        if (dbMatch) { dbUrl = dbMatch[0][1].trim() }
                     }
 
                     sh """
@@ -50,6 +53,7 @@ pipeline {
                             -t ${env.REGISTRY}/${env.IMAGE_NAME}:latest \
                             --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${clerkKey} \
                             --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \
+                            --build-arg DATABASE_URL=${dbUrl} \
                             .
                     """
                 }
