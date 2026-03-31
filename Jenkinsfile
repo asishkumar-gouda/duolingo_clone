@@ -6,10 +6,11 @@ pipeline {
     }
 
     environment {
-        REGISTRY     = 'localhost:5001'
-        IMAGE_NAME   = 'duolingo-clone'
-        DOCKER_TAG   = "${params.TAG.replaceFirst('^v', '')}"
-        FULL_IMAGE   = "${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}"
+        REGISTRY       = 'localhost:5001'
+        IMAGE_NAME     = 'duolingo-clone'
+        DOCKER_TAG     = "${params.TAG.replaceFirst('^v', '')}"
+        FULL_IMAGE     = "${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}"
+        DOCKER_BUILDKIT = '1'
     }
 
     stages {
@@ -81,13 +82,16 @@ pipeline {
 
         stage('Commit & Push Changes') {
             steps {
-                sh """
-                    git config user.email "jenkins@local"
-                    git config user.name "Jenkins CI"
-                    git add deploy/values.yaml deploy/Chart.yaml
-                    git diff --cached --quiet || git commit -m "ci: update image tag to ${env.DOCKER_TAG}"
-                    git push origin HEAD:main
-                """
+                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    sh """
+                        git config user.email "jenkins@local"
+                        git config user.name "Jenkins CI"
+                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/asishkumar-gouda/duolingo_clone.git
+                        git add deploy/values.yaml deploy/Chart.yaml
+                        git diff --cached --quiet || git commit -m "ci: update image tag to ${env.DOCKER_TAG}"
+                        git push origin HEAD:main
+                    """
+                }
                 echo "Changes pushed to main — ArgoCD will auto-sync"
             }
         }
