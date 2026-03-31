@@ -1,0 +1,10 @@
+Duolingo Clone deployed!
+
+Access the application:
+  http://localhost (via Kind NodePort mapping)
+
+Check pod status:
+  kubectl get pods -l app.kubernetes.io/name=duolingo-clone
+
+View logs:
+  kubectl logs -l app.kubernetes.io/name=duolingo-clone -f
